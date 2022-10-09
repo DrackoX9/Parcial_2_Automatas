@@ -5,35 +5,81 @@ from os import system
 #? indica que puede haber 0 o no mas de 1 repeticion
 #?! es una forma de negacion que indica que no puede estar presente una cadena en una posicion indicada
 
+#clases de la variable
+#esta expresion indica
+#no mas de una instancia de las palabras contenidas dentro, seguida de uno o mas espacio en blanco 
+clase="((extern|static|register)(\s)+)?" 
 
-
-clase="((extern|static|register)(\s)+)?" #clases de la variable
 tipo="(short int|int|long int|bool|float|double|long double|char)"#tipo de dato
+
+#En esta expresion se indica que no puede estar presente ninguna de las cadenas dentro de la expresion
+#estas cadenas corresponden a las palabras reservadadas (no todas) que no pueden usarse para nombres de variables
+#niega todas las palabras dentro de () si y solo si estan seguidas de uno o mas espacios o ;
 reservadas="(?!((char|int|short int|long int|bool|float|double|long double|const|if|else|while|switch|case|break|for|do|static|extern|register|auto)(\s|;)+))"#palabras reservadas
+
+
+#Nombre de la variable
+#uniendo le negacion de palabras reservadas se comprueba que no sea un nombre resercado, si no lo es entonces se valida
+#que el nombre de la variable cumpla con las reglas:
+#No puede ser una palabra resercada o iniciar con numeros
+#puede iniciar con una o mas letras mayus, minus o guion bajo, seguida o no de cualquier cantidad de numeros enteros o letras y guiones
 variable=reservadas+"([a-z]|[A-Z]|_)+([a-z]|[A-Z]|_|[0-9])*"#nombre de la variable
+
+
+#Operadores
+#expresiones que indican que se puede usar uno de los operadores contenidos dentro
 operadoresA="(\*|\+|/|-|>|==|<|¡=|<=|>=|=)"#operadores aritmeticos
 operadoresL="(&&|\|{2})"
 
 
 
 
-#condSimp = una variable sola, una variable o numero, seguido de un operador aritmetico seguido de una variable o 
-#           numero una o mas veces 
+#Condicion simple
+#Esta expresion indica
+#Puede ser una unica variable, un numero o variable seguido de un operador aritmetico con una variable o numero, indicando que
+#se puede repetir la parte del operador seguido de variable o numero, mas de una vez
 condSimp="("+variable+"|[0-9]+(.[0-9]+)?|("+variable+"|[0-9]+(.[0-9]+)?)(\s)*("+operadoresA+"("+variable+"|[0-9]+(.[0-9]+)?)(\s)*)+)"
 
-exp="((\s)*=(\s)*([0-9]+(.[0-9]+)?|"+condSimp+"))?;"#expresion de asignación MEJORAR
-#Expresion regular completa para la declaración de variables numericas
-declaracion="(\s)*"+clase+tipo+"(\s)+("+variable+";|"+variable+exp+")"
 
-#condComp = a una condicion simple o condicion simpleentre parentesis, seguida de un operador logico, seguido de una condicion simple entre parentesis, repetida una o mas veces 
+#Expresion
+#Corresponde a la operacion de asignacion con el signo =
+#la expresion indica
+#puede o no iniciar con cualquier cantidad de espacios, seguido del signo = con o sin espacios
+# despues del igual puede seguir uno o mas numeros del 0 al 9 seguido o no de: . por lo menos un numero
+# o despues del igual puede ser una condicion simple
+# toda la expresion es opcional o no se puede repetir mas de una vez y finalizada con ;
+exp="((\s)*=(\s)*([0-9]+(.[0-9]+)?|"+condSimp+"))?;"
+
+#Condicion compuesta
+#La expresion indica
+#puede ser una condicion simple, entre parentesis, seguida o no de espacios, seguido de un operadore logico 
+#con una condicion simple,entre parentesis, finalizando con o sin espacios
+#la parte del operador seguido de la condicion simple se puede utilizar una o mas veces
 condComp="(\("+condSimp+"\)(\s)*("+operadoresL+"(\s)*\("+condSimp+"\)(\s)*)+)"
+
+
+#Condicion 
+#La expresion indica que puede ser una condicion simple o una condicion compuesta , debe estar presente una de las dos
 condicion="("+condSimp+"|"+condComp+")"
 
+
 #expresion regular completa para la condicional if 
+#La expresion indica
+#la palabra if sguida de una condicion,que puede ser simple o compuesta, entre parentesis
 CondicionalIF="if\("+condicion+"\)"
 
 #expresion regular completa para la condicional while 
+#la expresion indica
+#debe iniciar con la palabra while seguida de una condicion, que puede ser simple o compuesta, entre parentesis
 bucleWhile="while\("+condicion+"\)"
+
+#Expresion regular para la declaracion de variables
+#la expresion indica
+#puede iniciar o no con espacion en blanco, seguido o no de una clase, seguida de una tipo de dato, con un espacio
+#luego puede ser una variable seguida de ; o una variable con asignacion, teniendo en cuenta que la expresion de asignacion termina con ;
+declaracion="(\s)*"+clase+tipo+"(\s)+("+variable+";|"+variable+exp+")"
+
+
 
 
 def main():
